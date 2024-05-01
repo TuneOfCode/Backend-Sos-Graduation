@@ -21,6 +21,8 @@
 
         public const string GetFriendshipByUserId = "friendships/{userId:guid}";
 
+        public const string GetFriendshipRecommendByUserId = "friendships/{userId:guid}/recommend";
+
         public const string RemoveFriendshipByUserId = "friendships/{userId:guid}/remove/{friendId:guid}";
     }
 }

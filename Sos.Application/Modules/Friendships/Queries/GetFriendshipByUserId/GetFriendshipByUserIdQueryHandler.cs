@@ -32,14 +32,13 @@ namespace Sos.Application.Modules.Friendships.Queries.GetFriendshipByUserId
         // < inheritdoc />
         public async Task<Maybe<PaginateList<FriendshipResponse>>> Handle(GetFriendshipByUserIdQuery request, CancellationToken cancellationToken)
         {
+            if (request.UserId != _userIdentifierProvider.UserId)
+            {
+                return Maybe<PaginateList<FriendshipResponse>>.None;
+            }
+
             int page = request.Page;
             int pageSize = request.PageSize;
-
-            //if (request.UserId != _userIdentifierProvider.UserId
-            //    || page < 1)
-            //{
-            //    return Maybe<PaginateList<FriendshipResponse>>.None;
-            //}
 
             if (page == default || page < 1)
             {

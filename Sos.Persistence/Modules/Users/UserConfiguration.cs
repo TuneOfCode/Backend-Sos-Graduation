@@ -59,6 +59,10 @@ namespace Sos.Persistence.Modules.Users
                     .IsRequired();
             });
 
+            builder.Property(user => user.VerifyCode);
+
+            builder.Property(user => user.VerifyCodeExpired);
+
             builder.Property(user => user.Role)
                 .HasConversion<string>()
                 .IsRequired();

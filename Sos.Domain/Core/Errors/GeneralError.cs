@@ -25,5 +25,13 @@ namespace Sos.Domain.Core.Errors
                 "Tài khoản hoặc mật khẩu không chính xác.",
                 "The wrong email or password."
             );
+
+        public static Error UserNotVerified
+            => new
+            (
+                "Authentication._UserNotVerified",
+                "Vui lòng xác minh tài khoản từ email.",
+                "Please verify your account."
+            );
     }
 }

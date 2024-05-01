@@ -46,5 +46,21 @@ namespace Sos.Domain.UserAggregate.Errors
                 "Mật khẩu hiện tại không hợp lệ.",
                 "The current password is invalid."
             );
+
+        public static Error VerifyCodeIsNotMatch =>
+            new
+            (
+                "UserDomain.VerifyCodeIsNotMatch",
+                "Mã xác thực không chính xác hoặc đã hết hạn.",
+                "The verify code is not match."
+            );
+
+        public static Error InvalidRefreshToken =>
+            new
+            (
+                "UserDomain.InvalidRefreshToken",
+                "Mã xác thực token không chính xác.",
+                "The refresh token is invalid."
+            );
     }
 }

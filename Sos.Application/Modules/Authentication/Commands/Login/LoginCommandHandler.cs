@@ -1,7 +1,10 @@
 ﻿using Sos.Application.Core.Abstractions.Authentication;
+using Sos.Application.Core.Abstractions.Cryptography;
 using Sos.Application.Core.Abstractions.Data;
+using Sos.Application.Core.Abstractions.Email;
 using Sos.Application.Core.Abstractions.Messaging;
 using Sos.Contracts.Authentication;
+using Sos.Contracts.Email;
 using Sos.Domain.Core.Commons.Maybe;
 using Sos.Domain.Core.Commons.Result;
 using Sos.Domain.Core.Errors;
@@ -15,23 +18,43 @@ namespace Sos.Application.Modules.Authentication.Commands.Login
     /// <summary>
     /// Represents the <see cref="LoginCommand"/> handler.
     /// </summary>
-    /// <remarks>
-    /// Initializes a new instance of the <see cref="LoginCommandHandler"/> class.
-    /// </remarks>
-    /// <param name="userRepository">The user repository.</param>
-    /// <param name="passwordHashCheckerService">The password hash checker service.</param>
-    /// <param name="jwtProvider">The jwt provider.</param>
-    public sealed class LoginCommandHandler(
-        IUserRepository userRepository,
-        IUnitOfWork unitOfWork,
-        IPasswordHashCheckerService passwordHashCheckerService,
-        IJwtProvider jwtProvider
-    ) : ICommandHandler<LoginCommand, Result<TokenResponse>>
+    public sealed class LoginCommandHandler : ICommandHandler<LoginCommand, Result<TokenResponse>>
     {
-        private readonly IUserRepository _userRepository = userRepository;
-        private readonly IUnitOfWork _unitOfWork = unitOfWork;
-        private readonly IPasswordHashCheckerService _passwordHashCheckerService = passwordHashCheckerService;
-        private readonly IJwtProvider _jwtProvider = jwtProvider;
+        private const string Subject = "Xác minh tài khoản trong ứng dụng SOS";
+        private const int ExprireMinutes = 3;
+
+        private readonly IUserRepository _userRepository;
+        private readonly IUnitOfWork _unitOfWork;
+        private readonly IPasswordHashCheckerService _passwordHashCheckerService;
+        private readonly IJwtProvider _jwtProvider;
+        private readonly IVerifyCodeGenerator _verifyCodeGenerator;
+        private readonly IEmailService _emailService;
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="LoginCommandHandler"/> class.
+        /// </summary>
+        /// <param name="userRepository">The user repository.</param>
+        /// <param name="unitOfWork">The unit of work.</param>
+        /// <param name="passwordHashCheckerService">The password hash checker service.</param>
+        /// <param name="jwtProvider">The JWT provider.</param>
+        /// <param name="verifyCodeGenerator">The verify code generator.</param>
+        /// <param name="emailService">The email service.</param>
+        public LoginCommandHandler(
+            IUserRepository userRepository,
+            IUnitOfWork unitOfWork,
+            IPasswordHashCheckerService passwordHashCheckerService,
+            IJwtProvider jwtProvider,
+            IVerifyCodeGenerator verifyCodeGenerator,
+            IEmailService emailService
+        )
+        {
+            _userRepository = userRepository;
+            _unitOfWork = unitOfWork;
+            _passwordHashCheckerService = passwordHashCheckerService;
+            _jwtProvider = jwtProvider;
+            _verifyCodeGenerator = verifyCodeGenerator;
+            _emailService = emailService;
+        }
 
         // <inheritdoc />
         public async Task<Result<TokenResponse>> Handle(LoginCommand request, CancellationToken cancellationToken)
@@ -57,6 +80,29 @@ namespace Sos.Application.Modules.Authentication.Commands.Login
             if (!isPasswordCorrect)
             {
                 return Result.Failure<TokenResponse>(GeneralError.InvalidEmailOrPassword);
+            }
+
+            if (user.VerifiedOnUtc == null)
+            {
+                if (user.VerifyCode == null
+                    || (user.VerifyCode != null && user.VerifyCodeExpired < DateTime.Now))
+                {
+                    user.VerifyCode = _verifyCodeGenerator.Generate();
+
+                    user.VerifyCodeExpired = DateTime.Now.AddMinutes(ExprireMinutes);
+
+                    _userRepository.Update(user);
+
+                    await _unitOfWork.SaveChangesAsync(cancellationToken);
+
+                    await _emailService.SendEmailAsync(new MailRequest(
+                        user.Email!.Value,
+                        Subject,
+                        user.VerifyCode!
+                    ));
+                }
+
+                return Result.Failure<TokenResponse>(GeneralError.UserNotVerified);
             }
 
             string accessToken = _jwtProvider.GenerateAccessToken(user);

@@ -72,7 +72,20 @@ namespace Sos.Domain.UserAggregate
         /// </summary>
         public Phone? ContactPhone { get; private set; }
 
+        /// <summary>
+        /// Gets the user avatar.
+        /// </summary>
         public Avatar? Avatar { get; set; } = null!;
+
+        /// <summary>
+        /// Gets the user verify code.
+        /// </summary>
+        public string? VerifyCode { get; set; } = null!;
+
+        /// <summary>
+        /// Gets the user verify code expired.
+        /// </summary>
+        public DateTime? VerifyCodeExpired { get; set; } = null!;
 
         /// <summary>
         /// Gets the user verified on UTC.
@@ -81,15 +94,31 @@ namespace Sos.Domain.UserAggregate
 
         public string? _passwordHash;
 
+        /// <summary>
+        /// Gets the user role.
+        /// </summary>
+
         public string Role { get; set; } = Roles.User;
+
+        /// <summary>
+        /// Gets the user refresh token.
+        /// </summary>
 
         public string? RefreshToken { get; set; } = string.Empty;
 
+        // <inheritdoc/>
+
         public DateTime CreatedOnUtc { get; }
+
+        // <inheritdoc/>// <inheritdoc/>
 
         public DateTime? ModifiedOnUtc { get; }
 
+        // <inheritdoc/>
+
         public DateTime? DeletedOnUtc { get; }
+
+        // <inheritdoc/>
 
         public bool Deleted { get; }
 
@@ -139,6 +168,16 @@ namespace Sos.Domain.UserAggregate
         public bool VerifyPasswordHash(string password, IPasswordHashCheckerService passwordHashChecker)
             => !string.IsNullOrWhiteSpace(password)
                 && passwordHashChecker.HashesMatch(_passwordHash!, password);
+
+        /// <summary>
+        /// Checks the verify code.
+        /// </summary>
+        /// <param name="code">The code value.</param>
+        /// <returns>True if verify code is match and not expired, otherwise false.</returns>
+        public bool VerifyCodeChecker(string code)
+            => !string.IsNullOrWhiteSpace(code)
+                && code == VerifyCode
+                && VerifyCodeExpired > DateTime.Now;
 
         /// <summary>
         /// Changes the user password.

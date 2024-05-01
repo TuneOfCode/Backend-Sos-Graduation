@@ -89,9 +89,9 @@ namespace Sos.Application.Modules.Friendships.Commands.CreateFriendshipRequest
 
             FriendshipRequest friendshipRequest = new(sender, receiver, status);
 
-            _friendshipRequestRepository.Insert(friendshipRequest);
+            //_friendshipRequestRepository.Insert(friendshipRequest);
 
-            await _unitOfWork.SaveChangesAsync(cancellationToken);
+            //await _unitOfWork.SaveChangesAsync(cancellationToken);
 
             return Result.Success(new FriendshipRequestResponse(
                 friendshipRequest.Id,

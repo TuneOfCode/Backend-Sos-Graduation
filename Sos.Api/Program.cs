@@ -1,10 +1,12 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.OpenApi.Models;
+using Sos.Api.Configurations;
 using Sos.Api.Middlewares;
 using Sos.Application;
 using Sos.Domain.UserAggregate.Enums;
 using Sos.Infrastructure;
+using Sos.Infrastructure.Socket;
 using Sos.Persistence;
 using Sos.Persistence.Data;
 
@@ -49,6 +51,8 @@ builder.Services.AddSwaggerGen(options =>
             Array.Empty<string>()
         }
     });
+
+    options.DocumentFilter<ExcludeDocumentFilter>();
 });
 
 var app = builder.Build();
@@ -100,4 +104,14 @@ app.UseAuthorization();
 
 app.MapControllers();
 
-app.Run();
+app.MapGet("/", () =>
+{
+    return Results.Redirect("/swagger");
+}).ExcludeFromDescription();
+
+app.MapHub<NotificationsHub>("/notifications-hub");
+
+app.MapHub<WebRTCsHub>("/webRTCs-hub");
+
+app.Run("http://*:6868");
+
