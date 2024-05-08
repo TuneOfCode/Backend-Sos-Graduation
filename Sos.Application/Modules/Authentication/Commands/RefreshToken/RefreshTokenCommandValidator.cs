@@ -7,12 +7,12 @@ namespace Sos.Application.Modules.Authentication.Commands.RefreshToken
     /// <summary>
     /// Represents the refresh token validator.
     /// </summary>
-    public sealed class RefreshTokenValidator : AbstractValidator<RefreshTokenCommand>
+    public sealed class RefreshTokenCommandValidator : AbstractValidator<RefreshTokenCommand>
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="RefreshTokenValidator"/> class.
+        /// Initializes a new instance of the <see cref="RefreshTokenCommandValidator"/> class.
         /// </summary>
-        public RefreshTokenValidator()
+        public RefreshTokenCommandValidator()
         {
             RuleFor(x => x.UserId)
                 .NotEmpty()

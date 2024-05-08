@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Sos.Api.Configurations;
 using Sos.Application.Modules.Users.Commands.ChangePassword;
+using Sos.Application.Modules.Users.Commands.UpdateLocation;
 using Sos.Application.Modules.Users.Commands.UpdateUser;
 using Sos.Application.Modules.Users.Queries.GetUserById;
 using Sos.Application.Modules.Users.Queries.GetUsers;
@@ -50,15 +51,28 @@ namespace Sos.Api.Modules.Users
                 .Match(Ok, BadRequest);
 
         [HttpPatch(UsersRoute.ChangePassword)]
-        [ProducesResponseType(typeof(UserResponse), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<IActionResult> ChangePasssword(Guid userId, ChangePasswordRequest changePasswordRequest) =>
+        public async Task<IActionResult> ChangePasssword(Guid userId, [FromBody] ChangePasswordRequest changePasswordRequest) =>
             await Result.Create(changePasswordRequest, GeneralError.UnProcessableRequest)
                 .Map(request => new ChangePasswordCommand(
                     userId,
                     request.CurrentPassword,
                     request.Password,
                     request.ConfirmPassword
+                ))
+                .Bind(command => Mediator.Send(command))
+                .Match(Ok, BadRequest);
+
+        [HttpPatch(UsersRoute.UpdateLocation)]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<IActionResult> UpdateLocation(Guid userId, [FromBody] UpdateLocationRequest updateLocationRequest) =>
+            await Result.Create(updateLocationRequest, GeneralError.UnProcessableRequest)
+                .Map(request => new UpdateLocationCommand(
+                    userId,
+                    request.Longitude,
+                    request.Latitude
                 ))
                 .Bind(command => Mediator.Send(command))
                 .Match(Ok, BadRequest);

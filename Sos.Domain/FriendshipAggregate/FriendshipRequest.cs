@@ -62,13 +62,13 @@ namespace Sos.Domain.FriendshipAggregate
         public Status? StatusRequest { get; set; }
 
         /// <inheritdoc />
-        public DateTime CreatedOnUtc { get; }
+        public DateTime CreatedAt { get; }
 
         /// <inheritdoc />
-        public DateTime? ModifiedOnUtc { get; }
+        public DateTime? ModifiedAt { get; }
 
         /// <inheritdoc />
-        public DateTime? DeletedOnUtc { get; }
+        public DateTime? DeletedAt { get; }
 
         /// <inheritdoc />
         public bool Deleted { get; }

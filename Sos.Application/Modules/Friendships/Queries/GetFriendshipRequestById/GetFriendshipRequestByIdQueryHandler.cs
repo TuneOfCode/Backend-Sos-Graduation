@@ -50,8 +50,8 @@ namespace Sos.Application.Modules.Friendships.Queries.GetFriendshipRequestById
                     receiver.FullName!,
                     receiver.Avatar!.AvatarUrl,
                     friendshipRequest.StatusRequest!.Value,
-                    friendshipRequest.CreatedOnUtc,
-                    friendshipRequest.ModifiedOnUtc
+                    friendshipRequest.CreatedAt,
+                    friendshipRequest.ModifiedAt
                  )
             ).SingleOrDefaultAsync(cancellationToken);
 

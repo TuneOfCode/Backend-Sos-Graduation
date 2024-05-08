@@ -14,9 +14,9 @@ namespace Sos.Application.Modules.Users.Commands.ChangePassword
         /// </summary>
         public ChangePasswordCommandValidator()
         {
-            RuleFor(x => x.UserId)
-                .NotEmpty()
-                .WithError(ChangePasswordError.UserIdIsRequired);
+            // RuleFor(x => x.UserId)
+            //     .NotEmpty()
+            //     .WithError(ChangePasswordError.UserIdIsRequired);
 
             RuleFor(x => x.CurrentPassword)
                 .NotEmpty()

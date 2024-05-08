@@ -31,10 +31,10 @@ namespace Sos.Persistence.Modules.Friendships
                 .IsRequired()
                 .OnDelete(DeleteBehavior.NoAction);
 
-            builder.Property(friendship => friendship.CreatedOnUtc)
+            builder.Property(friendship => friendship.CreatedAt)
                 .IsRequired();
 
-            builder.Property(friendship => friendship.ModifiedOnUtc);
+            builder.Property(friendship => friendship.ModifiedAt);
 
             builder.Ignore(friendship => friendship.Id);
         }

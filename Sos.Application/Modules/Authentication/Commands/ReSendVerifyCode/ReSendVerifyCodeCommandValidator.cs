@@ -7,12 +7,12 @@ namespace Sos.Application.Modules.Authentication.Commands.ReSendVerifyCode
     /// <summary>
     /// Represents the re-send verify code validator.
     /// </summary>
-    public sealed class ReSendVerifyCodeValidator : AbstractValidator<ReSendVerifyCodeCommand>
+    public sealed class ReSendVerifyCodeCommandValidator : AbstractValidator<ReSendVerifyCodeCommand>
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="ReSendVerifyCodeValidator"/> class.
+        /// Initializes a new instance of the <see cref="ReSendVerifyCodeCommandValidator"/> class.
         /// </summary>
-        public ReSendVerifyCodeValidator()
+        public ReSendVerifyCodeCommandValidator()
         {
             RuleFor(x => x.Email)
                 .NotEmpty()

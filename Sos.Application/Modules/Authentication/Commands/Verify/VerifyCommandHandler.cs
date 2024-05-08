@@ -57,7 +57,7 @@ namespace Sos.Application.Modules.Authentication.Commands.Verify
                 return Result.Failure(UserDomainError.VerifyCodeIsNotMatch);
             }
 
-            user.VerifiedOnUtc = DateTime.Now;
+            user.VerifiedAt = DateTime.Now;
 
             _userRepository.Update(user);
 

@@ -107,8 +107,10 @@ namespace Sos.Application.Modules.Users.Commands.CreateUser
                 newUser.Email!.Value,
                 newUser.ContactPhone!.Value,
                 newUser.Avatar!.AvatarUrl,
-                newUser.VerifiedOnUtc,
-                newUser.CreatedOnUtc
+                newUser.Location!.Longitude,
+                newUser.Location!.Latitude,
+                newUser.VerifiedAt,
+                newUser.CreatedAt
             ));
         }
     }

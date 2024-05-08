@@ -9,9 +9,11 @@
         string FirstName,
         string LastName,
         string Email,
-        string ContactPhoneNumber,
+        string ContactPhone,
         string? Avatar,
-        DateTime? VerifiedOnUtc,
-        DateTime? CreatedOnUtc
+        double Longitude,
+        double Latitude,
+        DateTime? VerifiedAt,
+        DateTime? CreatedAt
     );
 }

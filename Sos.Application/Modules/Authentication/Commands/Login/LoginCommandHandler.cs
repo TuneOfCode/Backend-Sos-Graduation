@@ -82,7 +82,7 @@ namespace Sos.Application.Modules.Authentication.Commands.Login
                 return Result.Failure<TokenResponse>(GeneralError.InvalidEmailOrPassword);
             }
 
-            if (user.VerifiedOnUtc == null)
+            if (user.VerifiedAt == null)
             {
                 if (user.VerifyCode == null
                     || (user.VerifyCode != null && user.VerifyCodeExpired < DateTime.Now))

@@ -108,12 +108,12 @@ namespace Sos.Persistence.Data
             {
                 if (entityEntry.State == EntityState.Added)
                 {
-                    entityEntry.Property(nameof(IAuditableEntity.CreatedOnUtc)).CurrentValue = localNow;
+                    entityEntry.Property(nameof(IAuditableEntity.CreatedAt)).CurrentValue = localNow;
                 }
 
                 if (entityEntry.State == EntityState.Modified)
                 {
-                    entityEntry.Property(nameof(IAuditableEntity.ModifiedOnUtc)).CurrentValue = localNow;
+                    entityEntry.Property(nameof(IAuditableEntity.ModifiedAt)).CurrentValue = localNow;
                 }
             }
         }
@@ -132,7 +132,7 @@ namespace Sos.Persistence.Data
                     continue;
                 }
 
-                entityEntry.Property(nameof(ISoftDeletableEntity.DeletedOnUtc)).CurrentValue = localNow;
+                entityEntry.Property(nameof(ISoftDeletableEntity.DeletedAt)).CurrentValue = localNow;
 
                 entityEntry.Property(nameof(ISoftDeletableEntity.Deleted)).CurrentValue = true;
 

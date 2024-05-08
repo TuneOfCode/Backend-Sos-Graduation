@@ -12,5 +12,7 @@
         public const string Update = "users/{userId:guid}";
 
         public const string ChangePassword = "users/{userId:guid}/change-password";
+
+        public const string UpdateLocation = "users/{userId:guid}/update-location";
     }
 }

@@ -59,6 +59,19 @@ namespace Sos.Persistence.Modules.Users
                     .IsRequired();
             });
 
+            builder.OwnsOne(user => user.Location, locationBuilder =>
+            {
+                locationBuilder.WithOwner();
+
+                locationBuilder.Property(location => location.Longitude)
+                    .HasColumnName(nameof(User.Location.Longitude))
+                    .HasDefaultValue(16.462622); // Hue, Vietnam
+
+                locationBuilder.Property(location => location.Latitude)
+                    .HasColumnName(nameof(User.Location.Latitude))
+                    .HasDefaultValue(107.585217); // Hue, Vietnam
+            });
+
             builder.Property(user => user.VerifyCode);
 
             builder.Property(user => user.VerifyCodeExpired);
@@ -69,11 +82,11 @@ namespace Sos.Persistence.Modules.Users
 
             builder.Property(user => user.RefreshToken);
 
-            builder.Property(user => user.CreatedOnUtc).IsRequired();
+            builder.Property(user => user.CreatedAt).IsRequired();
 
-            builder.Property(user => user.ModifiedOnUtc);
+            builder.Property(user => user.ModifiedAt);
 
-            builder.Property(user => user.DeletedOnUtc);
+            builder.Property(user => user.DeletedAt);
 
             builder.Property(user => user.Deleted).HasDefaultValue(false);
 

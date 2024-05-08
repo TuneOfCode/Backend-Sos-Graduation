@@ -111,8 +111,10 @@ namespace Sos.Application.Modules.Users.Commands.UpdateUser
                 user.Email!.Value,
                 user.ContactPhone!.Value,
                 user.Avatar!.AvatarUrl,
-                user.VerifiedOnUtc,
-                user.CreatedOnUtc
+                user.Location!.Longitude,
+                user.Location!.Latitude,
+                user.VerifiedAt,
+                user.CreatedAt
             ));
         }
     }

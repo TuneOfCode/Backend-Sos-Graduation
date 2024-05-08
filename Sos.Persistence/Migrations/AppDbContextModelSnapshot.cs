@@ -30,10 +30,10 @@ namespace Sos.Persistence.Migrations
                     b.Property<Guid>("FriendId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<DateTime>("CreatedOnUtc")
+                    b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
-                    b.Property<DateTime?>("ModifiedOnUtc")
+                    b.Property<DateTime?>("ModifiedAt")
                         .HasColumnType("datetime2");
 
                     b.HasKey("UserId", "FriendId");
@@ -49,7 +49,7 @@ namespace Sos.Persistence.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<DateTime>("CreatedOnUtc")
+                    b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
                     b.Property<bool>("Deleted")
@@ -57,10 +57,10 @@ namespace Sos.Persistence.Migrations
                         .HasColumnType("bit")
                         .HasDefaultValue(false);
 
-                    b.Property<DateTime?>("DeletedOnUtc")
+                    b.Property<DateTime?>("DeletedAt")
                         .HasColumnType("datetime2");
 
-                    b.Property<DateTime?>("ModifiedOnUtc")
+                    b.Property<DateTime?>("ModifiedAt")
                         .HasColumnType("datetime2");
 
                     b.Property<Guid>("ReceiverId")
@@ -84,7 +84,7 @@ namespace Sos.Persistence.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<DateTime>("CreatedOnUtc")
+                    b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
                     b.Property<bool>("Deleted")
@@ -92,7 +92,7 @@ namespace Sos.Persistence.Migrations
                         .HasColumnType("bit")
                         .HasDefaultValue(false);
 
-                    b.Property<DateTime?>("DeletedOnUtc")
+                    b.Property<DateTime?>("DeletedAt")
                         .HasColumnType("datetime2");
 
                     b.Property<string>("FirstName")
@@ -105,7 +105,7 @@ namespace Sos.Persistence.Migrations
                         .HasMaxLength(150)
                         .HasColumnType("nvarchar(150)");
 
-                    b.Property<DateTime?>("ModifiedOnUtc")
+                    b.Property<DateTime?>("ModifiedAt")
                         .HasColumnType("datetime2");
 
                     b.Property<string>("RefreshToken")
@@ -115,7 +115,7 @@ namespace Sos.Persistence.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<DateTime?>("VerifiedOnUtc")
+                    b.Property<DateTime?>("VerifiedAt")
                         .HasColumnType("datetime2");
 
                     b.Property<string>("VerifyCode")
@@ -223,6 +223,31 @@ namespace Sos.Persistence.Migrations
                                 .HasForeignKey("UserId");
                         });
 
+                    b.OwnsOne("Sos.Domain.UserAggregate.ValueObjects.Location", "Location", b1 =>
+                        {
+                            b1.Property<Guid>("UserId")
+                                .HasColumnType("uniqueidentifier");
+
+                            b1.Property<double>("Latitude")
+                                .ValueGeneratedOnAdd()
+                                .HasColumnType("float")
+                                .HasDefaultValue(107.585217)
+                                .HasColumnName("Latitude");
+
+                            b1.Property<double>("Longitude")
+                                .ValueGeneratedOnAdd()
+                                .HasColumnType("float")
+                                .HasDefaultValue(16.462622)
+                                .HasColumnName("Longitude");
+
+                            b1.HasKey("UserId");
+
+                            b1.ToTable("User");
+
+                            b1.WithOwner()
+                                .HasForeignKey("UserId");
+                        });
+
                     b.OwnsOne("Sos.Domain.UserAggregate.ValueObjects.Phone", "ContactPhone", b1 =>
                         {
                             b1.Property<Guid>("UserId")
@@ -247,6 +272,8 @@ namespace Sos.Persistence.Migrations
                     b.Navigation("ContactPhone");
 
                     b.Navigation("Email");
+
+                    b.Navigation("Location");
                 });
 #pragma warning restore 612, 618
         }

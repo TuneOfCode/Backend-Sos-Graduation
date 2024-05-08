@@ -38,8 +38,10 @@ namespace Sos.Application.Modules.Users.Queries.GetUserById
                     user.Email!.Value,
                     user.ContactPhone!.Value,
                     user.Avatar!.AvatarUrl,
-                    user.VerifiedOnUtc,
-                    user.CreatedOnUtc
+                    user.Location!.Longitude,
+                    user.Location!.Latitude,
+                    user.VerifiedAt,
+                    user.CreatedAt
                 ))
                 .SingleOrDefaultAsync(cancellationToken);
 

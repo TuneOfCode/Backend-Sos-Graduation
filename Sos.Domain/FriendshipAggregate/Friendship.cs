@@ -46,9 +46,9 @@ namespace Sos.Domain.FriendshipAggregate
         public Guid FriendId { get; }
 
         /// <inheritdoc />
-        public DateTime CreatedOnUtc { get; }
+        public DateTime CreatedAt { get; }
 
         /// <inheritdoc />
-        public DateTime? ModifiedOnUtc { get; }
+        public DateTime? ModifiedAt { get; }
     }
 }

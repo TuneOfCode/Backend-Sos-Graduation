@@ -20,6 +20,10 @@ namespace Sos.Infrastructure.Authentication
 
             string roleAppClaim = httpContextAccessor.HttpContext?.User?.FindFirstValue(ClaimsType.RoleApp) ?? throw new ArgumentException("The user role app claim is required.", nameof(httpContextAccessor));
 
+            string roleClaim = httpContextAccessor.HttpContext?.User?.FindFirstValue(ClaimTypes.Role)!;
+
+            Console.WriteLine($"===> role claim in token: {roleClaim}");
+
             UserId = new Guid(userIdClaim);
 
             Role = roleAppClaim;

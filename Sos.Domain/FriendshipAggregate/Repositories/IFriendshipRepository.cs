@@ -16,6 +16,13 @@ namespace Sos.Domain.FriendshipAggregate.Repositories
         Task<bool> CheckIfFriendshipExistsAsync(User user, User friend);
 
         /// <summary>
+        /// Gets all the friendships of the specified user.
+        /// </summary>
+        /// <param name="user">The user.</param>
+        /// <returns>The friendships of the specified user.</returns>
+        Task<IReadOnlyList<Friendship>> GetFriendshipsAsync(User user);
+
+        /// <summary>
         /// Inserts the specified friendship to the database.
         /// </summary>
         /// <param name="friendship">The friendship to be inserted to the database.</param>

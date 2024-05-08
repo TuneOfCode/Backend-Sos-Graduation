@@ -30,7 +30,8 @@ namespace Sos.Infrastructure.Socket
                     )
                 );
 
-                await Clients.Others.UserConnected(userId);
+                await Clients.All.UserConnected(userId);
+                Console.WriteLine($"===> {userId} is online");
             }
 
             return _usersConnected[userId];
@@ -43,11 +44,14 @@ namespace Sos.Infrastructure.Socket
         public async Task Disconnect()
         {
             string userId = Context.UserIdentifier!;
+
+            await Clients.All.UserDisconnected(userId);
+
+            Console.WriteLine($"===> {userId} is offline");
+
             if (_usersConnected.ContainsKey(userId))
             {
                 _usersConnected.Remove(userId);
-
-                await Clients.All.UserDisconnected(userId);
             }
         }
 
@@ -76,7 +80,7 @@ namespace Sos.Infrastructure.Socket
         public async Task StartCall(string toUserId)
         {
             string fromUserId = Context.UserIdentifier!;
-            Console.WriteLine($"===> Starting call from {fromUserId} to {toUserId}");
+            // Console.WriteLine($"===> Starting call from {fromUserId} to {toUserId}");
             await Clients.User(toUserId).IncommingCall(fromUserId);
             Console.WriteLine($"===> Started call from {fromUserId} to {toUserId}");
         }

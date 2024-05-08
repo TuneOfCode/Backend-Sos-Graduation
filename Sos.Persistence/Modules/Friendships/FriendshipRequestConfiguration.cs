@@ -36,11 +36,11 @@ namespace Sos.Persistence.Modules.Friendships
                     .IsRequired();
             });
 
-            builder.Property(friendship => friendship.CreatedOnUtc).IsRequired();
+            builder.Property(friendship => friendship.CreatedAt).IsRequired();
 
-            builder.Property(friendship => friendship.ModifiedOnUtc);
+            builder.Property(friendship => friendship.ModifiedAt);
 
-            builder.Property(friendship => friendship.DeletedOnUtc);
+            builder.Property(friendship => friendship.DeletedAt);
 
             builder.Property(friendship => friendship.Deleted).HasDefaultValue(false);
 

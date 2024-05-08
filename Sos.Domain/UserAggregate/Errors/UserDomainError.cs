@@ -62,5 +62,13 @@ namespace Sos.Domain.UserAggregate.Errors
                 "Mã xác thực token không chính xác.",
                 "The refresh token is invalid."
             );
+
+        public static Error InvalidLocation =>
+            new
+            (
+                "UserDomain.InvalidLocation",
+                "Toạ độ vị trí không hợp lệ.",
+                "The location is invalid."
+            );
     }
 }

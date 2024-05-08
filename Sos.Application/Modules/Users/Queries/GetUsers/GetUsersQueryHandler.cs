@@ -50,8 +50,10 @@ namespace Sos.Application.Modules.Users.Queries.GetUsers
                     u.Email!,
                     u.ContactPhone!,
                     u.Avatar!.AvatarUrl,
-                    u.VerifiedOnUtc,
-                    u.CreatedOnUtc
+                    u.Location!.Longitude,
+                    u.Location!.Latitude,
+                    u.VerifiedAt,
+                    u.CreatedAt
                 ));
 
             int totalCount = await userResponseQuery.CountAsync(cancellationToken);

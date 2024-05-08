@@ -2,7 +2,9 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
 using Newtonsoft.Json;
+using Sos.Api.Attributes;
 using Sos.Api.Configurations;
+using Sos.Application.Core.Abstractions.Cache;
 using Sos.Application.Core.Abstractions.Socket;
 using Sos.Application.Modules.Friendships.Commands.AcceptFriendshipRequest;
 using Sos.Application.Modules.Friendships.Commands.CancelFriendshipRequest;
@@ -20,6 +22,7 @@ using Sos.Contracts.Users;
 using Sos.Domain.Core.Commons.Maybe;
 using Sos.Domain.Core.Commons.Result;
 using Sos.Domain.Core.Errors;
+using Sos.Domain.FriendshipAggregate.Repositories;
 using Sos.Domain.UserAggregate.Repositories;
 using Sos.Infrastructure.Socket;
 
@@ -29,18 +32,24 @@ namespace Sos.Api.Modules.Friendships
     {
         private readonly IMediator _mediator;
         private readonly IUserRepository _userRepository;
+        private readonly IFriendshipRequestRepository _friendshipRequestRepository;
         private readonly IHubContext<NotificationsHub, INotificationsClient> _notificationsHubContext;
+        private readonly ICacheService _cacheService;
 
         public FriendshipsController(
             IMediator mediator,
             IUserRepository userRepository,
-            IHubContext<NotificationsHub, INotificationsClient> notificationsHubContext
+            IFriendshipRequestRepository friendshipRequestRepository,
+            IHubContext<NotificationsHub, INotificationsClient> notificationsHubContext,
+            ICacheService cacheService
 
         ) : base(mediator)
         {
             _mediator = mediator;
             _userRepository = userRepository;
+            _friendshipRequestRepository = friendshipRequestRepository;
             _notificationsHubContext = notificationsHubContext;
+            _cacheService = cacheService;
         }
 
         [HttpGet(FriendshipsRoute.GetFriendshipRequestById)]
@@ -82,7 +91,7 @@ namespace Sos.Api.Modules.Friendships
             var jsonContent = JsonConvert.SerializeObject(new
             {
                 Title = "Lời mời kết bạn",
-                SenderAvatar = sender.Avatar!.AvatarUrl,
+                Avatar = sender.Avatar!.AvatarUrl,
                 Message = $"{sender.FullName} đã gửi lời mời kết bạn đến bạn"
             });
 
@@ -99,6 +108,8 @@ namespace Sos.Api.Modules.Friendships
                 .User(friendshipRequestRequest.ReceiverId.ToString())
                 .ReceiveNotification(jsonContent);
 
+            await _cacheService.RemoveAsync(Request.Path);
+
             return result;
         }
 
@@ -106,10 +117,29 @@ namespace Sos.Api.Modules.Friendships
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> AcceptFriendshipRequest(
-            Guid friendshipRequestId) =>
-            await Result.Success(new AcceptFriendshipRequestCommand(friendshipRequestId))
+            Guid friendshipRequestId)
+        {
+            var friendshipRequest = await _friendshipRequestRepository.GetByIdAsync(friendshipRequestId);
+
+            var receiver = (await _userRepository.GetByIdAsync(friendshipRequest.Value.ReceiverId)).Value;
+            var jsonContent = JsonConvert.SerializeObject(new
+            {
+                Title = "Lời mời kết bạn",
+                Avatar = receiver.Avatar!.AvatarUrl,
+                Message = $"{receiver.FullName} đã chấp nhận lời mời kết bạn của bạn"
+            });
+
+            await _notificationsHubContext
+                .Clients
+                .User(friendshipRequest.Value.SenderId.ToString())
+                .ReceiveNotification(jsonContent);
+
+            var result = await Result.Success(new AcceptFriendshipRequestCommand(friendshipRequestId))
                 .Bind(command => _mediator.Send(command))
                 .Match(Ok, BadRequest);
+
+            return result;
+        }
 
         [HttpPatch(FriendshipsRoute.RejectFriendshipRequest)]
         [ProducesResponseType(StatusCodes.Status200OK)]
@@ -129,6 +159,7 @@ namespace Sos.Api.Modules.Friendships
                 .Bind(command => _mediator.Send(command))
                 .Match(Ok, BadRequest);
 
+        [Cache]
         [HttpGet(FriendshipsRoute.GetFriendshipByUserId)]
         [ProducesResponseType(typeof(PaginateList<FriendshipResponse>), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -139,6 +170,7 @@ namespace Sos.Api.Modules.Friendships
                 .Bind(query => _mediator.Send(query))
                 .Match(Ok, NotFound);
 
+        [Cache]
         [HttpGet(FriendshipsRoute.GetFriendshipRecommendByUserId)]
         [ProducesResponseType(typeof(PaginateList<UserResponse>), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]

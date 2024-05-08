@@ -11,27 +11,31 @@ namespace Sos.Application.Modules.Users.Errors
             new
             (
                 "ChangePassword.UserIdIsRequired",
+                "Mã người dùng bắt buộc phải có.",
                 "The user id is required."
             );
 
         public static Error PasswordIsRequired =>
             new
             (
-                "ChangePassword.PasswordIsRequired",
-                "The password id is required."
+                "ChangePassword.NewPasswordIsRequired",
+                "Mật khẩu mới bắt buộc phải có.",
+                "The new password is required."
             );
 
         public static Error CurrentPasswordIsRequired =>
             new
             (
                 "ChangePassword.CurrentPasswordIsRequired",
+                "Mật khẩu hiện tại bắt buộc phải có.",
                 "The current password is required."
             );
 
         public static Error PasswordCannotBeTheSameAsCurrentPassword =>
             new
             (
-                "ChangePassword.PasswordCannotBeTheSameAsCurrentPassword",
+                "ChangePassword.NewPasswordCannotBeTheSameAsCurrentPassword",
+                "Mật khẩu mới không được trùng với mật khẩu hiện tại.",
                 "The password cannot be the same as the current password."
             );
 
@@ -39,6 +43,7 @@ namespace Sos.Application.Modules.Users.Errors
             new
             (
                 "ChangePassword.ConfirmPasswordIsRequired",
+                "Nhập lại mật khẩu mới bắt buộc phải có.",
                 "The confirm password is required."
             );
 
@@ -46,6 +51,7 @@ namespace Sos.Application.Modules.Users.Errors
             new
             (
                 "ChangePassword.ConfirmPasswordDoesNotMatch",
+                "Nhập lại mật khẩu mới không chính xác.",
                 "The confirm password does not match."
             );
     }

@@ -8,10 +8,14 @@
         string FullName,
         string Email,
         string Avatar,
+        double Longitude,
+        double Latitude,
         Guid FriendId,
         string FriendFullName,
         string FriendEmail,
         string FriendAvatar,
+        double FriendLongitude,
+        double FriendLatitude,
         DateTime CreatedAt,
         DateTime? UpdatedAt
     );

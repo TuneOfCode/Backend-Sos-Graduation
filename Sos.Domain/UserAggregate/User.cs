@@ -78,6 +78,11 @@ namespace Sos.Domain.UserAggregate
         public Avatar? Avatar { get; set; } = null!;
 
         /// <summary>
+        /// Gets the user location.
+        /// </summary>
+        public Location? Location { get; set; }
+
+        /// <summary>
         /// Gets the user verify code.
         /// </summary>
         public string? VerifyCode { get; set; } = null!;
@@ -88,9 +93,9 @@ namespace Sos.Domain.UserAggregate
         public DateTime? VerifyCodeExpired { get; set; } = null!;
 
         /// <summary>
-        /// Gets the user verified on UTC.
+        /// Gets the user verified at.
         /// </summary>
-        public DateTime? VerifiedOnUtc { get; set; } = null!;
+        public DateTime? VerifiedAt { get; set; } = null!;
 
         public string? _passwordHash;
 
@@ -108,15 +113,15 @@ namespace Sos.Domain.UserAggregate
 
         // <inheritdoc/>
 
-        public DateTime CreatedOnUtc { get; }
+        public DateTime CreatedAt { get; }
 
         // <inheritdoc/>// <inheritdoc/>
 
-        public DateTime? ModifiedOnUtc { get; }
+        public DateTime? ModifiedAt { get; }
 
         // <inheritdoc/>
 
-        public DateTime? DeletedOnUtc { get; }
+        public DateTime? DeletedAt { get; }
 
         // <inheritdoc/>
 
@@ -194,6 +199,33 @@ namespace Sos.Domain.UserAggregate
             _passwordHash = newPasswordHash;
 
             AddDomainEvent(new UserPasswordChangedDomainEvent(this));
+
+            return Result.Success();
+        }
+
+        /// <summary>
+        /// Updates the user location.
+        /// </summary>
+        /// <param name="longitude">The longitude.</param>
+        /// <param name="latitude">The latitude.</param>
+        /// <returns>The success result or an error.</returns>
+        public Result UpdateLocation(double longitude, double latitude)
+        {
+            if (double.IsNaN(longitude) || double.IsNaN(latitude))
+            {
+                return Result.Failure(UserDomainError.InvalidLocation);
+            }
+
+            Result<Location> locationResult = Location.Create(longitude, latitude);
+
+            if (locationResult.IsFailure)
+            {
+                return Result.Failure(locationResult.Error);
+            }
+
+            Location = locationResult.Value;
+
+            AddDomainEvent(new UserLocationUpdatedDomainEvent(this));
 
             return Result.Success();
         }

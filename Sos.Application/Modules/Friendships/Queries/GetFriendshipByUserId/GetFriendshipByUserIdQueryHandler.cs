@@ -63,12 +63,16 @@ namespace Sos.Application.Modules.Friendships.Queries.GetFriendshipByUserId
                     user.FullName!,
                     user.Email!,
                     user.Avatar!.AvatarUrl,
+                    user.Location!.Longitude,
+                    user.Location!.Latitude,
                     friend.Id,
                     friend.FullName!,
                     friend.Email!,
                     friend.Avatar!.AvatarUrl,
-                    friendship.CreatedOnUtc,
-                    friendship.ModifiedOnUtc
+                    friend.Location!.Longitude,
+                    friend.Location!.Latitude,
+                    friendship.CreatedAt,
+                    friendship.ModifiedAt
                 );
 
             int totalCount = await friendshipResponseQuery.CountAsync(cancellationToken);

@@ -114,4 +114,3 @@ app.MapHub<NotificationsHub>("/notifications-hub");
 app.MapHub<WebRTCsHub>("/webRTCs-hub");
 
 app.Run("http://*:6868");
-

@@ -6,13 +6,13 @@
     public interface IAuditableEntity
     {
         /// <summary>
-        /// Gets the created on date and time in UTC format.
+        /// Gets the created on date and time.
         /// </summary>
-        DateTime CreatedOnUtc { get; }
+        DateTime CreatedAt { get; }
 
         /// <summary>
-        /// Gets the modified on date and time in UTC format.
+        /// Gets the modified on date and time.
         /// </summary>
-        DateTime? ModifiedOnUtc { get; }
+        DateTime? ModifiedAt { get; }
     }
 }

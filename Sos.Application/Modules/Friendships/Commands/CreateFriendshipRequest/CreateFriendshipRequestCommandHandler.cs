@@ -89,9 +89,9 @@ namespace Sos.Application.Modules.Friendships.Commands.CreateFriendshipRequest
 
             FriendshipRequest friendshipRequest = new(sender, receiver, status);
 
-            //_friendshipRequestRepository.Insert(friendshipRequest);
+            _friendshipRequestRepository.Insert(friendshipRequest);
 
-            //await _unitOfWork.SaveChangesAsync(cancellationToken);
+            await _unitOfWork.SaveChangesAsync(cancellationToken);
 
             return Result.Success(new FriendshipRequestResponse(
                 friendshipRequest.Id,
@@ -102,8 +102,8 @@ namespace Sos.Application.Modules.Friendships.Commands.CreateFriendshipRequest
                 receiver.FullName!,
                 receiver.Avatar!.AvatarUrl,
                 status.Value,
-                friendshipRequest.CreatedOnUtc,
-                friendshipRequest.ModifiedOnUtc
+                friendshipRequest.CreatedAt,
+                friendshipRequest.ModifiedAt
             ));
         }
     }

@@ -54,8 +54,8 @@ namespace Sos.Application.Modules.Friendships.Queries.GetFriendshipRequestByRece
                     user.FullName!,
                     user.Avatar!.AvatarUrl,
                     friendshipRequest.StatusRequest!.Value,
-                    friendshipRequest.CreatedOnUtc,
-                    friendshipRequest.ModifiedOnUtc
+                    friendshipRequest.CreatedAt,
+                    friendshipRequest.ModifiedAt
                 )
             ).ToArrayAsync(cancellationToken);
 

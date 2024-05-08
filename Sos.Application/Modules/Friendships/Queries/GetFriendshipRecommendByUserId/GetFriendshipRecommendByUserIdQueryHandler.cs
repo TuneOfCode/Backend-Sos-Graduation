@@ -79,8 +79,10 @@ namespace Sos.Application.Modules.Friendships.Queries.GetFriendshipRecommendByUs
                     stranger.Email!.Value,
                     stranger.ContactPhone!.Value,
                     stranger.Avatar!.AvatarUrl,
-                    stranger.VerifiedOnUtc,
-                    stranger.CreatedOnUtc
+                    stranger.Location!.Longitude,
+                    stranger.Location!.Latitude,
+                    stranger.VerifiedAt,
+                    stranger.CreatedAt
                 );
 
             int totalCount = await friendshipRecommendResponseQuery.CountAsync(cancellationToken);
