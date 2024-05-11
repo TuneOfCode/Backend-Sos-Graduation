@@ -53,7 +53,7 @@ namespace Sos.Api.Middlewares
         {
             (HttpStatusCode httpStatusCode, IReadOnlyCollection<Error> errors) = GetHttpStatusCodeAndErrors(exception);
 
-            httpContext.Response.ContentType = "application/json";
+            httpContext.Response.ContentType = "application/json; charset=utf-8";
 
             httpContext.Response.StatusCode = (int)httpStatusCode;
 

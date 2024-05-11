@@ -12,7 +12,7 @@ namespace Sos.Infrastructure.Socket
         // <inheritdoc />
         public string? GetUserId(HubConnectionContext connection)
         {
-            Console.WriteLine($"===> GetUserId: {connection.User.FindFirstValue(ClaimsType.UserId)}");
+            // Console.WriteLine($"===> GetUserId: {connection.User.FindFirstValue(ClaimsType.UserId)}");
             return connection.User.FindFirstValue(ClaimsType.UserId);
         }
     }

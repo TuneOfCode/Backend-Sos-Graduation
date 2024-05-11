@@ -31,8 +31,15 @@ namespace Sos.Application.Core.Abstractions.Socket
         /// <summary>
         /// Receives the location of victim from the client.
         /// </summary>
+        /// <param name="data">The location data.</param>
+        /// <returns></returns>
+        Task ReceiveLocation(string data);
+
+        /// <summary>
+        /// Trackes the location of victim from the client.
+        /// </summary>
         /// <param name="location">The location value.</param>
         /// <returns></returns>
-        Task ReceiveLocation(LocationResponse location);
+        Task TrackLocation(LocationResponse location);
     }
 }

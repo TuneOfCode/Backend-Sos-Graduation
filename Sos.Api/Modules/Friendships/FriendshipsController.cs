@@ -103,12 +103,12 @@ namespace Sos.Api.Modules.Friendships
                 .Bind(command => _mediator.Send(command))
                 .Match(Ok, BadRequest);
 
+            await _cacheService.RemoveAsync(Request.Path);
+
             await _notificationsHubContext
                 .Clients
                 .User(friendshipRequestRequest.ReceiverId.ToString())
                 .ReceiveNotification(jsonContent);
-
-            await _cacheService.RemoveAsync(Request.Path);
 
             return result;
         }
@@ -159,7 +159,6 @@ namespace Sos.Api.Modules.Friendships
                 .Bind(command => _mediator.Send(command))
                 .Match(Ok, BadRequest);
 
-        [Cache]
         [HttpGet(FriendshipsRoute.GetFriendshipByUserId)]
         [ProducesResponseType(typeof(PaginateList<FriendshipResponse>), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -170,7 +169,7 @@ namespace Sos.Api.Modules.Friendships
                 .Bind(query => _mediator.Send(query))
                 .Match(Ok, NotFound);
 
-        [Cache]
+        // [Cache]
         [HttpGet(FriendshipsRoute.GetFriendshipRecommendByUserId)]
         [ProducesResponseType(typeof(PaginateList<UserResponse>), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]

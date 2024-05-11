@@ -65,11 +65,11 @@ namespace Sos.Persistence.Modules.Users
 
                 locationBuilder.Property(location => location.Longitude)
                     .HasColumnName(nameof(User.Location.Longitude))
-                    .HasDefaultValue(16.462622); // Hue, Vietnam
+                    .HasDefaultValue(107.585217); // Hue, Vietnam
 
                 locationBuilder.Property(location => location.Latitude)
                     .HasColumnName(nameof(User.Location.Latitude))
-                    .HasDefaultValue(107.585217); // Hue, Vietnam
+                    .HasDefaultValue(16.462622); // Hue, Vietnam
             });
 
             builder.Property(user => user.VerifyCode);

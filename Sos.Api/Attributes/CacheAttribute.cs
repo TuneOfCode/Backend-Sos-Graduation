@@ -43,7 +43,7 @@ namespace Sos.Api.Attributes
                 var contentResult = new ContentResult()
                 {
                     Content = cacheValue,
-                    ContentType = "application/json",
+                    ContentType = "application/json; charset=utf-8",
                     StatusCode = StatusCodes.Status200OK,
                 };
 

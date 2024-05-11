@@ -79,11 +79,33 @@ namespace Sos.Infrastructure.Socket
         /// <summary>
         /// Sends a location from the client.
         /// </summary>
-        /// <param name="data">The data of the notification.</param>
+        /// <param name="data">The location of current user.</param>
         /// <returns></returns>
         public async Task SendLocation(string data)
         {
-            Console.WriteLine($"===> Context.UserIdentifier!: {Context.UserIdentifier!}");
+            Console.WriteLine($"===> Current User: {Context.UserIdentifier!}");
+            Console.WriteLine($"===> Data: {data}");
+
+            var currentUserId = Guid.Parse(Context.UserIdentifier!);
+
+            var currentUser = (await _userRepository.GetByIdAsync(currentUserId)).Value;
+
+            var friendships = await _friendshipRepository.GetFriendshipsAsync(currentUser);
+
+            var friendshipIds = friendships.Select(fr => fr.FriendId.ToString()).ToList();
+
+            await _notificationsHubContext.Clients.User(Context.UserIdentifier!.ToString()).ReceiveLocation(data);
+
+            await _notificationsHubContext.Clients.Users(friendshipIds).ReceiveLocation(data);
+        }
+
+        /// <summary>
+        /// Trackes a location from the client.
+        /// </summary>
+        /// <param name="data">The data of the notification.</param>
+        /// <returns></returns>
+        public async Task TrackLocation(string data)
+        {
             Console.WriteLine($"===> Data: {data}");
             await _producer.PublishAsync(MessageQueueConfiguration.SOS_TOPIC, data);
 
@@ -122,10 +144,13 @@ namespace Sos.Infrastructure.Socket
 
             await _cacheService.SetAsync(cacheKey, locationResponse, TimeSpan.FromDays(1));
 
-            await _notificationsHubContext.Clients.Users(friendshipIds).ReceiveLocation(locationResponse);
+            await _notificationsHubContext.Clients.Users(friendshipIds).TrackLocation(locationResponse);
         }
 
-
+        /// <summary>
+        /// Sends a safe from the victim.
+        /// </summary>
+        /// <returns></returns>
         public async Task SendSafeFromVicTim()
         {
             Console.WriteLine($"===> Victim!: {Context.UserIdentifier!}");
