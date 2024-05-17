@@ -40,6 +40,13 @@ namespace Sos.Application.Core.Abstractions.Socket
         /// </summary>
         /// <param name="location">The location value.</param>
         /// <returns></returns>
-        Task TrackLocation(LocationResponse location);
+        Task TrackLocation(string location);
+
+        /// <summary>
+        /// Receives the safe from victim from the client.
+        /// </summary>
+        /// <param name="victimId">The victim id.</param>
+        /// <returns></returns>
+        Task ReceiveSafeFromVictim(string victimId);
     }
 }

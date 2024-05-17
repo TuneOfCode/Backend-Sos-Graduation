@@ -17,6 +17,7 @@
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.0.3" />
     <PackageReference Include="Microsoft.Extensions.Caching.StackExchangeRedis" Version="8.0.4" />
     <PackageReference Include="Microsoft.Extensions.Localization.Abstractions" Version="8.0.4" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
   </ItemGroup>
 
   <ItemGroup>
@@ -26,6 +27,9 @@
 
   <ItemGroup>
     <Folder Include="Modules\Authentication\EventHandlers\" />
+    <Folder Include="Modules\Notifications\Commands\" />
+    <Folder Include="Modules\Notifications\Errors\" />
+    <Folder Include="Modules\Notifications\EventHandlers\" />
   </ItemGroup>
 
 </Project>

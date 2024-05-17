@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.SignalR;
 using Sos.Application.Core.Abstractions.Cache;
 using Sos.Application.Core.Abstractions.MessageQueue;
 using Sos.Application.Core.Abstractions.Socket;
+using Sos.Contracts.Notifications;
 using Sos.Contracts.Socket;
 using Sos.Domain.FriendshipAggregate.Repositories;
 using Sos.Domain.UserAggregate.Repositories;
@@ -21,8 +22,6 @@ namespace Sos.Infrastructure.Socket
         private readonly IProducer _producer;
         private readonly IConsumer _consumer;
         private readonly IUserRepository _userRepository;
-        private readonly IFriendshipRepository _friendshipRepository;
-        private readonly IHubContext<NotificationsHub, INotificationsClient> _notificationsHubContext;
         private readonly ICacheService _cacheService;
 
         /// <summary>
@@ -31,23 +30,17 @@ namespace Sos.Infrastructure.Socket
         /// <param name="producer">The producer.</param>
         /// <param name="consumer">The consumer.</param>
         /// <param name="userRepository">The user repository.</param>
-        /// <param name="friendshipRepository">The friendship repository.</param>
-        /// <param name="notificationsHubContext">The notifications hub context.</param>
         /// <param name="cacheService">The cache service.</param>
         public NotificationsHub(
             IProducer producer,
             IConsumer consumer,
             IUserRepository userRepository,
-            IFriendshipRepository friendshipRepository,
-            IHubContext<NotificationsHub, INotificationsClient> notificationsHubContext,
             ICacheService cacheService
         )
         {
             _producer = producer;
             _consumer = consumer;
             _userRepository = userRepository;
-            _friendshipRepository = friendshipRepository;
-            _notificationsHubContext = notificationsHubContext;
             _cacheService = cacheService;
         }
 
@@ -80,34 +73,31 @@ namespace Sos.Infrastructure.Socket
         /// Sends a location from the client.
         /// </summary>
         /// <param name="data">The location of current user.</param>
+        /// <param name="ids">The ids of friends.</param>
         /// <returns></returns>
-        public async Task SendLocation(string data)
+        public async Task SendLocation(string data, string ids)
         {
             Console.WriteLine($"===> Current User: {Context.UserIdentifier!}");
             Console.WriteLine($"===> Data: {data}");
+            Console.WriteLine($"===> Ids: {ids}");
 
-            var currentUserId = Guid.Parse(Context.UserIdentifier!);
+            var friendshipIds = JsonSerializer.Deserialize<IList<string>>(ids);
 
-            var currentUser = (await _userRepository.GetByIdAsync(currentUserId)).Value;
+            await Clients.User(Context.UserIdentifier!.ToString()).ReceiveLocation(data);
 
-            var friendships = await _friendshipRepository.GetFriendshipsAsync(currentUser);
-
-            var friendshipIds = friendships.Select(fr => fr.FriendId.ToString()).ToList();
-
-            await _notificationsHubContext.Clients.User(Context.UserIdentifier!.ToString()).ReceiveLocation(data);
-
-            await _notificationsHubContext.Clients.Users(friendshipIds).ReceiveLocation(data);
+            await Clients.Users(friendshipIds!).ReceiveLocation(data);
         }
 
         /// <summary>
         /// Trackes a location from the client.
         /// </summary>
         /// <param name="data">The data of the notification.</param>
+        /// <param name="ids">The ids of friends.</param>
         /// <returns></returns>
-        public async Task TrackLocation(string data)
+        public async Task SendTrackingLocation(string data, string ids)
         {
             Console.WriteLine($"===> Data: {data}");
-            await _producer.PublishAsync(MessageQueueConfiguration.SOS_TOPIC, data);
+            Console.WriteLine($"===> Ids: {ids}");
 
             var locationResponse = JsonSerializer.Deserialize<LocationResponse>(data, new JsonSerializerOptions
             {
@@ -118,65 +108,74 @@ namespace Sos.Infrastructure.Socket
             Console.WriteLine($"===> Longitude in SendLocation: {locationResponse!.Longitude}");
             Console.WriteLine($"===> Latitude in SendLocation: {locationResponse!.Latitude}");
 
-            var victim = (await _userRepository.GetByIdAsync(locationResponse!.VictimId)).Value;
+            var friendshipIds = JsonSerializer.Deserialize<IList<string>>(ids);
 
-            var friendships = await _friendshipRepository.GetFriendshipsAsync(victim);
+            await Clients.User(locationResponse!.VictimId.ToString()).TrackLocation(data);
 
-            var friendshipIds = friendships.Select(fr => fr.FriendId.ToString()).ToList();
+            await Clients.Users(friendshipIds!).TrackLocation(data);
 
-            var jsonContent = JsonSerializer.Serialize(
-                new
-                {
-                    Title = "Thông báo cứu trợ khẩn cấp",
-                    Avatar = victim.Avatar!.AvatarUrl,
-                    Message = $"Bạn của bạn là {victim.FullName} đang cần được trợ giúp!."
-                }
-            );
+            var sosKey = "sos_notification";
 
-            var cacheKey = $"{locationResponse.VictimId}_{DateTime.Now.Ticks}";
+            var sosCached = await _cacheService.GetAsync(sosKey);
 
-            var cacheData = await _cacheService.GetAsync(cacheKey);
+            Console.WriteLine($"===> sosCached: {sosCached}");
 
-            if (cacheData == null)
+            if (sosCached == null)
             {
-                await _notificationsHubContext.Clients.Users(friendshipIds).ReceiveNotification(jsonContent);
+                var victim = (await _userRepository.GetByIdAsync(locationResponse!.VictimId)).Value;
+
+                var newNotificationItem = new NotificationRequest(
+                    Guid.NewGuid(),
+                    "Thông báo cứu trợ khẩn cấp",
+                    $"Bạn của bạn là {victim.FullName} đang cần được trợ giúp!",
+                    victim.Avatar!.AvatarUrl,
+                    DateTime.Now.ToString("yyyy-MM-ddTHH:mm:ss.fffZ")
+                );
+
+                var jsonContent = JsonSerializer.Serialize(newNotificationItem);
+
+                await Clients.Users(friendshipIds!).ReceiveNotification(jsonContent);
+
+                await _cacheService.SetAsync(sosKey, locationResponse!.VictimId, TimeSpan.FromSeconds(30));
+
+                await SaveNotificationAsync(_cacheService, friendshipIds!, newNotificationItem);
             }
 
-            await _cacheService.SetAsync(cacheKey, locationResponse, TimeSpan.FromDays(1));
-
-            await _notificationsHubContext.Clients.Users(friendshipIds).TrackLocation(locationResponse);
+            await _producer.PublishAsync(MessageQueueConfiguration.SOS_TOPIC, data);
         }
 
         /// <summary>
         /// Sends a safe from the victim.
         /// </summary>
+        /// <param name="ids">The ids of friends.</param>
         /// <returns></returns>
-        public async Task SendSafeFromVicTim()
+        public async Task SendSafeFromVictim(string ids)
         {
-            Console.WriteLine($"===> Victim!: {Context.UserIdentifier!}");
-
             var victimId = Guid.Parse(Context.UserIdentifier!);
 
             var victim = (await _userRepository.GetByIdAsync(victimId)).Value;
 
-            var friendships = await _friendshipRepository.GetFriendshipsAsync(victim);
+            var friendshipIds = JsonSerializer.Deserialize<IList<string>>(ids);
 
-            var friendshipIds = friendships.Select(fr => fr.FriendId.ToString()).ToList();
-
-            var jsonContent = JsonSerializer.Serialize(
-                new
-                {
-                    Title = "Thông báo an toàn",
-                    Avatar = victim.Avatar!.AvatarUrl,
-                    Message = $"Bạn của bạn là {victim.FullName} đã an toàn!."
-                }
+            var newNotificationItem = new NotificationRequest(
+                Guid.NewGuid(),
+                "Thông báo an toàn",
+                $"Bạn của bạn là {victim.FullName} đã an toàn!",
+                victim.Avatar!.AvatarUrl,
+                DateTime.Now.ToString("yyyy-MM-ddTHH:mm:ss.fffZ")
             );
 
-            await _notificationsHubContext.Clients.Users(friendshipIds).ReceiveNotification(jsonContent);
+            var jsonContent = JsonSerializer.Serialize(newNotificationItem);
+
+            await Clients.Users(friendshipIds!).ReceiveNotification(jsonContent);
+
+            await Clients.Users(friendshipIds!).ReceiveSafeFromVictim(victimId.ToString());
+
+            await _cacheService.RemoveAsync("sos_notification");
+
+            await SaveNotificationAsync(_cacheService, friendshipIds!, newNotificationItem);
 
             await _consumer.UnsubscribeAsync(MessageQueueConfiguration.SOS_TOPIC, MessageQueueConfiguration.SOS_FRIENSHIP_GROUP);
-
-            // await _cacheService.RemoveAsync(victimId.ToString());
         }
 
         /// <summary>
@@ -206,6 +205,36 @@ namespace Sos.Infrastructure.Socket
             Clients.All.DisconnectAsync(_usersConnected);
 
             return base.OnDisconnectedAsync(exception);
+        }
+
+        private static async Task SaveNotificationAsync(ICacheService cacheService, IList<string> friendshipIds, NotificationRequest newNotificationItem)
+        {
+            foreach (var friendshipId in friendshipIds)
+            {
+                var notificationKey = $"notification_{friendshipId}";
+
+                var notificationsCached = await cacheService.GetAsync(notificationKey);
+
+                var newNotifications = new List<NotificationRequest>();
+
+                Console.WriteLine($"===> notificationsCached with {friendshipId}: {notificationsCached}");
+
+                if (notificationsCached == null)
+                {
+                    newNotifications.Add(newNotificationItem);
+                }
+                else
+                {
+                    newNotifications = JsonSerializer
+                        .Deserialize<List<NotificationRequest>>(notificationsCached, new JsonSerializerOptions {
+                            PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+                        });
+
+                    newNotifications!.Add(newNotificationItem);
+                }
+                
+                await cacheService.SetAsync(notificationKey, newNotifications!, TimeSpan.FromMinutes(3));
+            }
         }
     }
 }

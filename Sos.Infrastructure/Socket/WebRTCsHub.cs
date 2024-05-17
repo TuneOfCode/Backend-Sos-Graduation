@@ -63,13 +63,8 @@ namespace Sos.Infrastructure.Socket
         /// <returns></returns>
         public async Task SendIceCandidate(string toUserId, string candidate)
         {
-            Console.WriteLine($"===> ICE candidate of {toUserId} is {candidate}");
-            string fromUserId = Context.UserIdentifier!;
             await Clients.User(toUserId).ReceiveIceCandidate(candidate);
-            // if (_usersConnected.ContainsKey(toUserId))
-            // {
-            //     await Clients.Client(_usersConnected[toUserId].ConnectionId).ReceiveIceCandidate(fromUserId, candidate);
-            // }
+            Console.WriteLine($"===> ICE candidate of {toUserId} is {candidate}");
         }
 
         /// <summary>
@@ -80,7 +75,6 @@ namespace Sos.Infrastructure.Socket
         public async Task StartCall(string toUserId)
         {
             string fromUserId = Context.UserIdentifier!;
-            // Console.WriteLine($"===> Starting call from {fromUserId} to {toUserId}");
             await Clients.User(toUserId).IncommingCall(fromUserId);
             Console.WriteLine($"===> Started call from {fromUserId} to {toUserId}");
         }
@@ -95,12 +89,6 @@ namespace Sos.Infrastructure.Socket
             string toUserId = Context.UserIdentifier!;
             await Clients.User(fromUserId).CallAccepted(toUserId);
             Console.WriteLine($"===> {toUserId} Accepted call of {fromUserId}");
-            // if (_usersConnected.ContainsKey(fromUserId))
-            // {
-            //     await Clients.Client(_usersConnected[fromUserId].ConnectionId).CallAccepted(toUserId);
-
-            //     await Clients.Client(_usersConnected[toUserId].ConnectionId).CallConnected(fromUserId);
-            // }
         }
 
         /// <summary>
@@ -113,10 +101,6 @@ namespace Sos.Infrastructure.Socket
             string toUserId = Context.UserIdentifier!;
             await Clients.User(fromUserId).CallDenied(toUserId);
             Console.WriteLine($"===> {toUserId} Denied call of {fromUserId}");
-            // if (_usersConnected.ContainsKey(fromUserId))
-            // {
-            //     await Clients.Client(_usersConnected[fromUserId].ConnectionId).CallDenied(toUserId);
-            // }
         }
 
         /// <summary>
@@ -129,10 +113,6 @@ namespace Sos.Infrastructure.Socket
             string fromUserId = Context.UserIdentifier!;
             await Clients.User(toUserId).CallLeft(fromUserId);
             Console.WriteLine($"===> {fromUserId} Left call");
-            // if (_usersConnected.ContainsKey(toUserId))
-            // {
-            //     await Clients.Client(_usersConnected[toUserId].ConnectionId).CallLeft(fromUserId);
-            // }
         }
 
         /// <summary>
@@ -143,13 +123,8 @@ namespace Sos.Infrastructure.Socket
         /// <returns></returns>
         public async Task Offer(string toUserId, string offer)
         {
-            string fromUserId = Context.UserIdentifier!;
-            Console.WriteLine($"===> Offer of {toUserId}");
             await Clients.User(toUserId).Offer(offer);
-            // if (_usersConnected.ContainsKey(toUserId))
-            // {
-            //     await Clients.Client(_usersConnected[toUserId].ConnectionId).Offer(fromUserId, offer);
-            // }
+            Console.WriteLine($"===> Offer of {toUserId}");
         }
 
         /// <summary>
@@ -160,13 +135,8 @@ namespace Sos.Infrastructure.Socket
         /// <returns></returns>
         public async Task OfferAnswer(string toUserId, string offer)
         {
-            string fromUserId = Context.UserIdentifier!;
-            Console.WriteLine($"===> Offer answer of {toUserId}");
             await Clients.User(toUserId).OfferAnswer(offer);
-            // if (_usersConnected.ContainsKey(toUserId))
-            // {
-            //     await Clients.Client(_usersConnected[toUserId].ConnectionId).OfferAnswer(fromUserId, offer);
-            // }
+            Console.WriteLine($"===> Offer answer of {toUserId}");
         }
     }
 }

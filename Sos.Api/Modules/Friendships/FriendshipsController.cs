@@ -2,7 +2,6 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
 using Newtonsoft.Json;
-using Sos.Api.Attributes;
 using Sos.Api.Configurations;
 using Sos.Application.Core.Abstractions.Cache;
 using Sos.Application.Core.Abstractions.Socket;
@@ -18,6 +17,7 @@ using Sos.Application.Modules.Friendships.Queries.GetFriendshipRequestByReceiver
 using Sos.Application.Modules.Friendships.Queries.GetFriendshipRequestBySender;
 using Sos.Contracts.Common;
 using Sos.Contracts.Friendships;
+using Sos.Contracts.Notifications;
 using Sos.Contracts.Users;
 using Sos.Domain.Core.Commons.Maybe;
 using Sos.Domain.Core.Commons.Result;
@@ -88,12 +88,16 @@ namespace Sos.Api.Modules.Friendships
             [FromBody] FriendshipRequestRequest friendshipRequestRequest)
         {
             var sender = (await _userRepository.GetByIdAsync(friendshipRequestRequest.SenderId)).Value;
-            var jsonContent = JsonConvert.SerializeObject(new
-            {
-                Title = "Lời mời kết bạn",
-                Avatar = sender.Avatar!.AvatarUrl,
-                Message = $"{sender.FullName} đã gửi lời mời kết bạn đến bạn"
-            });
+
+            var newNotificationItem = new NotificationRequest(
+                    Guid.NewGuid(),
+                    "Lời mời kết bạn",
+                    $"{sender.FullName} đã gửi lời mời kết bạn đến bạn",
+                    sender.Avatar!.AvatarUrl,
+                    DateTime.Now.ToString("yyyy-MM-ddTHH:mm:ss.fffZ")
+            );
+
+            var jsonContent = JsonConvert.SerializeObject(newNotificationItem);
 
             var result = await Result.Create(friendshipRequestRequest, GeneralError.UnProcessableRequest)
                 .Map(request => new CreateFriendshipRequestCommand(
@@ -105,9 +109,13 @@ namespace Sos.Api.Modules.Friendships
 
             await _cacheService.RemoveAsync(Request.Path);
 
+            var receiverId = friendshipRequestRequest.ReceiverId.ToString();
+
+            await SaveNotificationAsync(_cacheService, receiverId, newNotificationItem);
+
             await _notificationsHubContext
                 .Clients
-                .User(friendshipRequestRequest.ReceiverId.ToString())
+                .User(receiverId)
                 .ReceiveNotification(jsonContent);
 
             return result;
@@ -122,16 +130,24 @@ namespace Sos.Api.Modules.Friendships
             var friendshipRequest = await _friendshipRequestRepository.GetByIdAsync(friendshipRequestId);
 
             var receiver = (await _userRepository.GetByIdAsync(friendshipRequest.Value.ReceiverId)).Value;
-            var jsonContent = JsonConvert.SerializeObject(new
-            {
-                Title = "Lời mời kết bạn",
-                Avatar = receiver.Avatar!.AvatarUrl,
-                Message = $"{receiver.FullName} đã chấp nhận lời mời kết bạn của bạn"
-            });
+
+            var newNotificationItem = new NotificationRequest(
+                    Guid.NewGuid(),
+                    "Lời mời kết bạn",
+                    $"{receiver.FullName} đã chấp nhận lời mời kết bạn của bạn",
+                    receiver.Avatar!.AvatarUrl,
+                    DateTime.Now.ToString("yyyy-MM-ddTHH:mm:ss.fffZ")
+            );
+
+            var jsonContent = JsonConvert.SerializeObject(newNotificationItem);
+
+            var senderId = friendshipRequest.Value.SenderId.ToString();
+
+            await SaveNotificationAsync(_cacheService, senderId, newNotificationItem);
 
             await _notificationsHubContext
                 .Clients
-                .User(friendshipRequest.Value.SenderId.ToString())
+                .User(senderId)
                 .ReceiveNotification(jsonContent);
 
             var result = await Result.Success(new AcceptFriendshipRequestCommand(friendshipRequestId))
@@ -188,5 +204,35 @@ namespace Sos.Api.Modules.Friendships
             await Result.Success(new RemoveFriendshipCommand(userId, friendId))
                 .Bind(command => _mediator.Send(command))
                 .Match(Ok, BadRequest);
+
+        private static async Task SaveNotificationAsync(ICacheService cacheService, string userId, NotificationRequest newNotificationItem)
+        {
+            var notificationKey = $"notification_{userId}";
+
+            var notificationsCached = await cacheService
+                .GetAsync(notificationKey);
+
+            if (notificationsCached == null)
+            {
+                var newNotifications = new List<NotificationRequest>
+                {
+                    newNotificationItem,
+                };
+
+                await cacheService.SetAsync(notificationKey, newNotifications, TimeSpan.FromMinutes(3));
+            }
+            else
+            {
+                var notifications = JsonConvert
+                    .DeserializeObject<List<NotificationRequest>>(notificationsCached);
+
+                if (notifications != null)
+                {
+                    notifications.Add(newNotificationItem);
+
+                    await cacheService.SetAsync(notificationKey, notifications, TimeSpan.FromMinutes(3));
+                }
+            }
+        }
     }
 }
