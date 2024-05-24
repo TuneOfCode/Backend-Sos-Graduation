@@ -1,4 +1,4 @@
-﻿using EventReminder.Infrastructure.Cryptography;
+﻿using Sos.Infrastructure.Cryptography;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.SignalR;

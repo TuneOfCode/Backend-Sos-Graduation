@@ -3,12 +3,12 @@
 #Depending on the operating system of the host machines(s) that will build or run the containers, the image specified in the FROM statement may need to be changed.
 #For more information, please see https://aka.ms/containercompat
 
-FROM mcr.microsoft.com/dotnet/aspnet:8.0-nanoserver-1809 AS base
+FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS base
 WORKDIR /app
-EXPOSE 8080
-EXPOSE 8081
+EXPOSE 80
+EXPOSE 443
 
-FROM mcr.microsoft.com/dotnet/sdk:8.0-nanoserver-1809 AS build
+FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
 COPY ["Sos.Domain/Sos.Domain.csproj", "Sos.Domain/"]
@@ -17,7 +17,7 @@ COPY ["Sos.Application/Sos.Application.csproj", "Sos.Application/"]
 COPY ["Sos.Infrastructure/Sos.Infrastructure.csproj", "Sos.Infrastructure/"]
 COPY ["Sos.Persistence/Sos.Persistence.csproj", "Sos.Persistence/"]
 COPY ["Sos.Api/Sos.Api.csproj", "Sos.Api/"]
-RUN dotnet restore "./Sos.Api/./Sos.Api.csproj"
+RUN dotnet restore "Sos.Api/Sos.Api.csproj"
 COPY . .
 WORKDIR "/src/Sos.Api"
 RUN dotnet build "./Sos.Api.csproj" -c %BUILD_CONFIGURATION% -o /app/build

@@ -4,12 +4,12 @@ using Sos.Domain.UserAggregate.Services;
 using Sos.Domain.UserAggregate.ValueObjects;
 using System.Security.Cryptography;
 
-namespace EventReminder.Infrastructure.Cryptography
+namespace Sos.Infrastructure.Cryptography
 {
     /// <summary>
     /// Represents the password hasher, used for hashing passwords and verifying hashed passwords.
     /// </summary>
-    internal sealed class PasswordHasher : IPasswordHasher,
+    public class PasswordHasher : IPasswordHasher,
         IPasswordHashCheckerService, IDisposable
     {
         private const KeyDerivationPrf Prf = KeyDerivationPrf.HMACSHA256;

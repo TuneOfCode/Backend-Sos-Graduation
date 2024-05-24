@@ -39,5 +39,7 @@
         public static string[] AllowedExtensions = { ".jpg", ".jpeg", ".png", ".gif", ".tiff" };
 
         public static string StoragePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "images");
+
+        public static string MediaStoragePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "medias");
     }
 }

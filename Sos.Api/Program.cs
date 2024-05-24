@@ -59,32 +59,26 @@ var app = builder.Build();
 
 
 // Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
-{
+// if (app.Environment.IsDevelopment())
+// {
     app.UseSwagger();
     app.UseSwaggerUI();
-}
+// }
 
 // Add migrate database
 using (var serviceScope = app.Services.CreateScope())
 {
-
     AppDbContext dbContext = serviceScope.ServiceProvider.GetRequiredService<AppDbContext>();
 
     dbContext.Database.Migrate();
 
+    DataSeeder.Run(dbContext).Wait();
 }
 
 // Add middleware to the pipeline
 app.UseMiddleware<ExceptionHandlerMiddleware>();
 
-// Add static files
-var options = new StaticFileOptions
-{
-    FileProvider = new PhysicalFileProvider(UserRequirementEnum.StoragePath),
-    RequestPath = "/images"
-};
-
+// Add CORS
 app.UseCors(builder => builder
     .AllowAnyOrigin()
     .AllowAnyMethod()
@@ -92,7 +86,23 @@ app.UseCors(builder => builder
     .SetIsOriginAllowed(options => true)
 );
 
-app.UseStaticFiles(options);
+// Add static image files
+var imageOptions = new StaticFileOptions
+{
+    FileProvider = new PhysicalFileProvider(UserRequirementEnum.StoragePath),
+    RequestPath = "/images"
+};
+
+app.UseStaticFiles(imageOptions);
+
+// Add static media files
+var mediaOptions = new StaticFileOptions
+{
+    FileProvider = new PhysicalFileProvider(UserRequirementEnum.MediaStoragePath),
+    RequestPath = "/medias"
+};
+
+app.UseStaticFiles(mediaOptions);
 
 app.UseHttpsRedirection();
 
@@ -109,8 +119,16 @@ app.MapGet("/", () =>
     return Results.Redirect("/swagger");
 }).ExcludeFromDescription();
 
+// Add hub
 app.MapHub<NotificationsHub>("/notifications-hub");
 
 app.MapHub<WebRTCsHub>("/webRTCs-hub");
 
-app.Run("http://*:6868");
+if (app.Environment.IsDevelopment())
+{
+   app.Run("http://*:6868");
+}
+else
+{
+   app.Run();
+}

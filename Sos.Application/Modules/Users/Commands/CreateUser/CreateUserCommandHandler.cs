@@ -85,6 +85,16 @@ namespace Sos.Application.Modules.Users.Commands.CreateUser
 
             newUser.Avatar = avatarResult.Value;
 
+            var random = new Random();
+
+            double latitude = random.NextDouble() * (16.80000 - 16.00000) + 16.00000;
+
+            double longitude = random.NextDouble() * (108.20000 - 107.80000) + 107.80000;
+
+            Result<Location> location = Location.Create(longitude, latitude);
+
+            newUser.Location = location.Value;
+
             newUser.VerifyCode = _verifyCodeGenerator.Generate();
 
             newUser.VerifyCodeExpired = DateTime.Now.AddMinutes(ExprireMinutes);
